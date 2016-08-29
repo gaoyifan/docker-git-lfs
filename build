@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+apk update
+apk add git
+apk add --virtual build-dependencies build-base go
+
+export GOPATH=/usr/local/src/go
+export LFS_SRC=/usr/local/src/git-lfs
+mkdir -p $GOPATH
+mkdir -p $LFS_SRC
+git clone -b $LFS_VERSION --depth=1 https://github.com/github/git-lfs.git $LFS_SRC
+cd $LFS_SRC
+go get -d ./...
+go build -o git-lfs .
+strip git-lfs
+install -m755 git-lfs /usr/libexec/git-core
+git lfs install
+
+cd /
+rm -rf $GOPATH $LFS_SRC
+rm -rf /var/cache/apk/*
+apk del --purge build-dependencies
